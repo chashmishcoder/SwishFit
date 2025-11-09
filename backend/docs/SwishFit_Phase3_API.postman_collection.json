@@ -1,0 +1,571 @@
+{
+  "info": {
+    "name": "SwishFit Phase 3 API",
+    "description": "Complete Phase 3 API collection for Progress, Leaderboard, Coach, and AI Analysis",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5001/api"
+    },
+    {
+      "key": "playerToken",
+      "value": "YOUR_PLAYER_JWT_TOKEN"
+    },
+    {
+      "key": "coachToken",
+      "value": "YOUR_COACH_JWT_TOKEN"
+    },
+    {
+      "key": "adminToken",
+      "value": "YOUR_ADMIN_JWT_TOKEN"
+    },
+    {
+      "key": "playerId",
+      "value": "PLAYER_ID"
+    },
+    {
+      "key": "workoutId",
+      "value": "WORKOUT_ID"
+    },
+    {
+      "key": "progressId",
+      "value": "PROGRESS_ID"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Progress Tracking API",
+      "item": [
+        {
+          "name": "1.1 Log Workout Progress",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workoutId\": \"{{workoutId}}\",\n  \"exerciseResults\": [\n    {\n      \"exerciseName\": \"Free Throw Shooting\",\n      \"shotsMade\": 8,\n      \"shotsAttempted\": 10,\n      \"repsCompleted\": 10,\n      \"accuracy\": 80\n    }\n  ],\n  \"playerNotes\": \"Felt strong today, good shooting form\",\n  \"rating\": 5,\n  \"enjoymentLevel\": \"enjoyed\",\n  \"difficultyFeedback\": \"just-right\",\n  \"completed\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress"]
+            }
+          }
+        },
+        {
+          "name": "1.2 Get My Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/my-progress?page=1&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "my-progress"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.3 Get Player Progress",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/player/{{playerId}}?completed=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "player", "{{playerId}}"],
+              "query": [
+                {
+                  "key": "completed",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.4 Get Progress By ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "{{progressId}}"]
+            }
+          }
+        },
+        {
+          "name": "1.5 Get Performance Analytics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/analytics/{{playerId}}?period=monthly",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "analytics", "{{playerId}}"],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "monthly"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "1.6 Get Workout Statistics",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/stats/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "stats", "{{playerId}}"]
+            }
+          }
+        },
+        {
+          "name": "1.7 Update Progress",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerNotes\": \"Updated after coach review\",\n  \"rating\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "{{progressId}}"]
+            }
+          }
+        },
+        {
+          "name": "1.8 Delete Progress",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/progress/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "{{progressId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Leaderboard API",
+      "item": [
+        {
+          "name": "2.1 Get Global Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard?page=1&limit=20&sortBy=totalPoints",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "totalPoints"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.2 Get Team Leaderboard",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/team/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "team", "{{playerId}}"]
+            }
+          }
+        },
+        {
+          "name": "2.3 Get Player Rank",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/rank/{{playerId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "rank", "{{playerId}}"]
+            }
+          }
+        },
+        {
+          "name": "2.4 Get My Rank",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/my-rank",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "my-rank"]
+            }
+          }
+        },
+        {
+          "name": "2.5 Get Top Performers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/top-performers?metric=averageAccuracy&limit=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "top-performers"],
+              "query": [
+                {
+                  "key": "metric",
+                  "value": "averageAccuracy"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "2.6 Get Leaderboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "stats"]
+            }
+          }
+        },
+        {
+          "name": "2.10 Update All Rankings (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{adminToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/leaderboard/update-rankings",
+              "host": ["{{baseUrl}}"],
+              "path": ["leaderboard", "update-rankings"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Coach Management API",
+      "item": [
+        {
+          "name": "3.1 Get My Players",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/coach/players",
+              "host": ["{{baseUrl}}"],
+              "path": ["coach", "players"]
+            }
+          }
+        },
+        {
+          "name": "3.2 Get Player Overview",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/coach/players/{{playerId}}/overview",
+              "host": ["{{baseUrl}}"],
+              "path": ["coach", "players", "{{playerId}}", "overview"]
+            }
+          }
+        },
+        {
+          "name": "3.4 Add Coach Feedback",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coachFeedback\": \"Excellent shooting technique! Focus on follow-through for even better results.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coach/feedback/{{progressId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["coach", "feedback", "{{progressId}}"]
+            }
+          }
+        },
+        {
+          "name": "3.5 Assign Workout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"workoutId\": \"{{workoutId}}\",\n  \"playerIds\": [\"{{playerId}}\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/coach/assign-workout",
+              "host": ["{{baseUrl}}"],
+              "path": ["coach", "assign-workout"]
+            }
+          }
+        },
+        {
+          "name": "3.8 Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/coach/dashboard",
+              "host": ["{{baseUrl}}"],
+              "path": ["coach", "dashboard"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. AI Performance Analysis",
+      "item": [
+        {
+          "name": "4.1 Analyze Own Performance",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{playerToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"days\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress/analyze",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "analyze"]
+            }
+          }
+        },
+        {
+          "name": "4.2 Coach Analyze Player",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{coachToken}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"playerId\": \"{{playerId}}\",\n  \"days\": 14\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/progress/analyze",
+              "host": ["{{baseUrl}}"],
+              "path": ["progress", "analyze"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "0. Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"player@example.com\",\n  \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

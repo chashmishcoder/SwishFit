@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const mongoSanitize = require('express-mongo-sanitize');
+const xss = require('xss-clean');
 require('dotenv').config();
 
 const app = express();
@@ -16,6 +18,10 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan('dev'));
+
+// Security middleware - Sanitize data
+app.use(mongoSanitize()); // Prevent NoSQL injection attacks
+app.use(xss()); // Prevent XSS attacks
 
 // Database connection
 const connectDB = async () => {
@@ -35,13 +41,44 @@ const connectDB = async () => {
 // Connect to database
 connectDB();
 
+// Import middleware
+const { apiLimiter, authLimiter } = require('./middleware/rateLimiter');
+
+// Import routes
+const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
+const workoutRoutes = require('./routes/workoutRoutes');
+const progressRoutes = require('./routes/progressRoutes');
+const leaderboardRoutes = require('./routes/leaderboardRoutes');
+const coachRoutes = require('./routes/coachRoutes');
+
 // Health check route
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'SwishFit Backend Server is running!',
+  // Check MongoDB connection status
+  const dbStatus = mongoose.connection.readyState;
+  const dbStates = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting'
+  };
+  
+  const isHealthy = dbStatus === 1;
+  
+  res.status(isHealthy ? 200 : 503).json({ 
+    status: isHealthy ? 'OK' : 'Service Unavailable',
+    database: dbStates[dbStatus] || 'unknown',
+    message: isHealthy 
+      ? 'SwishFit Backend Server is running!' 
+      : 'Server running but database connection issue',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    mongodb: {
+      status: dbStates[dbStatus],
+      host: mongoose.connection.host || 'not connected',
+      name: mongoose.connection.name || 'not connected'
+    }
   });
 });
 
@@ -53,6 +90,7 @@ app.get('/api', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth/*',
+      users: '/api/users/*',
       workouts: '/api/workouts/*',
       progress: '/api/progress/*',
       leaderboard: '/api/leaderboard/*',
@@ -61,25 +99,31 @@ app.get('/api', (req, res) => {
   });
 });
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).json({
-    success: false,
-    error: 'Route not found',
-    path: req.originalUrl
-  });
-});
+// Apply rate limiting
+app.use('/api/', apiLimiter); // General API rate limiter
+app.use('/api/auth/login', authLimiter); // Stricter limit for login
+app.use('/api/auth/register', authLimiter); // Stricter limit for register
 
-// Global error handler
-app.use((err, req, res, next) => {
-  console.error('Error:', err.stack);
-  
-  res.status(err.statusCode || 500).json({
-    success: false,
-    error: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
+// Mount routes
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/workouts', workoutRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/leaderboard', leaderboardRoutes);
+app.use('/api/coach', coachRoutes);
+
+// Mount test routes (development only)
+if (process.env.NODE_ENV !== 'production') {
+  const testSecurityRoutes = require('./routes/testSecurityRoutes');
+  app.use('/api/test-security', testSecurityRoutes);
+}
+
+// Import error handlers
+const { notFound, errorHandler } = require('./middleware/errorHandler');
+
+// Error handling - must be after all routes
+app.use(notFound);
+app.use(errorHandler);
 
 // Start server
 const PORT = process.env.PORT || 5000;
