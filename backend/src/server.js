@@ -7,6 +7,9 @@ const mongoSanitize = require('express-mongo-sanitize');
 const xss = require('xss-clean');
 require('dotenv').config();
 
+const logger = require('./utils/logger');
+const { requestLogger, performanceMonitor } = require('./middleware/monitoring');
+
 const app = express();
 
 // Middleware
@@ -17,7 +20,15 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+
+// Logging middleware
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined', { stream: logger.stream }));
+  app.use(requestLogger);
+  app.use(performanceMonitor);
+} else {
+  app.use(morgan('dev'));
+}
 
 // Security middleware - Sanitize data
 app.use(mongoSanitize()); // Prevent NoSQL injection attacks
@@ -26,10 +37,23 @@ app.use(xss()); // Prevent XSS attacks
 // Database connection
 const connectDB = async () => {
   try {
+    const startTime = Date.now();
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/swishfit');
+    const duration = Date.now() - startTime;
+    
     console.log('✅ MongoDB Connected Successfully');
+    logger.info('Database Connected', {
+      host: mongoose.connection.host,
+      name: mongoose.connection.name,
+      duration: `${duration}ms`,
+    });
   } catch (error) {
     console.error('❌ MongoDB Connection Error:', error.message);
+    logger.error('Database Connection Failed', {
+      error: error.message,
+      stack: error.stack,
+    });
+    
     console.log('⚠️  Continuing without database connection (development mode)');
     // Don't exit process in development, allow manual connection retry
     if (process.env.NODE_ENV === 'production') {
@@ -147,6 +171,11 @@ const server = app.listen(PORT, () => {
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
   console.error('❌ Unhandled Promise Rejection:', err);
+  logger.error('Unhandled Promise Rejection', {
+    error: err.message,
+    stack: err.stack,
+  });
+  
   if (process.env.NODE_ENV === 'production') {
     server.close(() => process.exit(1));
   }
@@ -155,8 +184,11 @@ process.on('unhandledRejection', (err) => {
 // Handle SIGTERM
 process.on('SIGTERM', () => {
   console.log('👋 SIGTERM received, shutting down gracefully...');
+  logger.info('Server Shutdown Initiated', { signal: 'SIGTERM' });
+  
   server.close(() => {
     console.log('✅ Server closed');
+    logger.info('Server Closed Successfully');
     mongoose.connection.close();
   });
 });
