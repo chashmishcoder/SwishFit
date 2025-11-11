@@ -31,25 +31,34 @@ const Navbar = () => {
               >
                 Dashboard
               </Link>
-              <Link
-                to="/workouts"
-                className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
-              >
-                Workouts
-              </Link>
-              <Link
-                to="/progress"
-                className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
-              >
-                📊 Progress
-              </Link>
+              
+              {/* Hide these links for admin */}
+              {user?.role !== 'admin' && (
+                <>
+                  <Link
+                    to="/workouts"
+                    className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
+                  >
+                    Workouts
+                  </Link>
+                  <Link
+                    to="/progress"
+                    className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
+                  >
+                    📊 Progress
+                  </Link>
+                </>
+              )}
+              
               <Link
                 to="/leaderboard"
                 className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
               >
                 🏆 Leaderboard
               </Link>
-              {(user?.role === 'coach' || user?.role === 'admin') && (
+              
+              {/* Coach Portal - Only for Coaches (not admin) */}
+              {user?.role === 'coach' && (
                 <Link
                   to="/coach/portal"
                   className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
@@ -57,12 +66,14 @@ const Navbar = () => {
                   👨‍🏫 Coach Portal
                 </Link>
               )}
+              
+              {/* Admin Panel - Only for Admin */}
               {user?.role === 'admin' && (
                 <Link
                   to="/admin/dashboard"
                   className="text-gray-700 hover:text-basketball-orange transition font-medium px-3 py-2 rounded-md hover:bg-orange-50"
                 >
-                  🛡️ Admin
+                  🛡️ Admin Panel
                 </Link>
               )}
             </div>
@@ -118,23 +129,27 @@ const Navbar = () => {
                       )}
                     </Menu.Item>
 
-                    <Menu.Item>
-                      {({ active }) => (
-                        <Link
-                          to="/ai-analysis"
-                          className={`${
-                            active ? 'bg-gray-100 text-basketball-orange' : 'text-gray-700'
-                          } group flex items-center px-4 py-2 text-sm`}
-                        >
-                          <svg className="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                          </svg>
-                          AI Analysis
-                        </Link>
-                      )}
-                    </Menu.Item>
+                    {/* Hide AI Analysis for admin */}
+                    {user?.role !== 'admin' && (
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            to="/ai-analysis"
+                            className={`${
+                              active ? 'bg-gray-100 text-basketball-orange' : 'text-gray-700'
+                            } group flex items-center px-4 py-2 text-sm`}
+                          >
+                            <svg className="mr-3 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                            </svg>
+                            AI Analysis
+                          </Link>
+                        )}
+                      </Menu.Item>
+                    )}
 
-                    {(user?.role === 'coach' || user?.role === 'admin') && (
+                    {/* Create Workout - Only for coaches (not admin) */}
+                    {user?.role === 'coach' && (
                       <Menu.Item>
                         {({ active }) => (
                           <Link
@@ -185,30 +200,49 @@ const Navbar = () => {
         >
           Dashboard
         </Link>
-        <Link
-          to="/workouts"
-          className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
-        >
-          Workouts
-        </Link>
-        <Link
-          to="/progress"
-          className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
-        >
-          📊 Progress
-        </Link>
+        
+        {/* Hide these links for admin */}
+        {user?.role !== 'admin' && (
+          <>
+            <Link
+              to="/workouts"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
+            >
+              Workouts
+            </Link>
+            <Link
+              to="/progress"
+              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
+            >
+              📊 Progress
+            </Link>
+          </>
+        )}
+        
         <Link
           to="/leaderboard"
           className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
         >
           🏆 Leaderboard
         </Link>
-        {(user?.role === 'coach' || user?.role === 'admin') && (
+        
+        {/* Coach Portal - Only for coaches (not admin) */}
+        {user?.role === 'coach' && (
           <Link
             to="/coach/portal"
             className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
           >
             👨‍🏫 Coach Portal
+          </Link>
+        )}
+        
+        {/* Admin Panel - Only for admin */}
+        {user?.role === 'admin' && (
+          <Link
+            to="/admin/dashboard"
+            className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-basketball-orange hover:bg-gray-50"
+          >
+            🛡️ Admin Panel
           </Link>
         )}
       </div>

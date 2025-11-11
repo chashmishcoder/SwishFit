@@ -18,20 +18,22 @@ const adminService = {
         api.get('/users/coaches'),
         api.get('/users/players'),
         api.get('/leaderboard', { params: { limit: 10 } }),
-        api.get('/workouts', { params: { limit: 1000 } }) // Get all workouts for count
+        api.get('/workouts', { params: { limit: 1, page: 1 } }) // Just get first workout to access 'total' count
       ]);
 
-      // Backend returns: { success, data: { players: [...] } } or { coaches: [...] }
+      // Backend returns: { success, data: { players: [...], pagination: {...} } } or { coaches: [...], pagination: {...} }
       const coaches = coachesRes.data?.data?.coaches || [];
       const players = playersRes.data?.data?.players || [];
       const leaderboard = leaderboardRes.data?.data || [];
-      const workouts = workoutsRes.data?.data || [];
+      
+      // For workouts, use the 'total' count from pagination instead of array length
+      const totalWorkouts = workoutsRes.data?.total || 0;
 
       return {
         totalUsers: coaches.length + players.length,
         totalCoaches: coaches.length,
         totalPlayers: players.length,
-        totalWorkouts: workouts.length,
+        totalWorkouts: totalWorkouts,
         activeUsers: leaderboard.length
       };
     } catch (error) {
@@ -105,7 +107,7 @@ const adminService = {
    * @returns {Promise} Updated user
    */
   updateUserRole: async (userId, role) => {
-    const response = await api.put(`/users/${userId}`, { role });
+    const response = await api.put(`/users/${userId}/role`, { role });
     return response.data;
   },
 
@@ -249,32 +251,33 @@ const adminService = {
 
       const leaderboardData = leaderboard.data?.data || [];
       const workoutsData = workouts.data?.data || [];
-      const playersData = players.data?.data || [];
+      const playersData = players.data?.data?.players || [];
 
-    // Calculate analytics
-    const totalWorkouts = leaderboardData.reduce((sum, user) => sum + (user.stats?.totalWorkouts || 0), 0);
-    const avgCompletionRate = leaderboardData.reduce((sum, user) => sum + (user.stats?.completionRate || 0), 0) / (leaderboardData.length || 1);
-    const activeToday = playersData.filter(p => {
-      const lastActive = new Date(p.lastActive);
-      const today = new Date();
-      return lastActive.toDateString() === today.toDateString();
-    }).length;
+      // Calculate analytics
+      // Use correct field names from Leaderboard model: totalWorkoutsCompleted, completionRate (not stats.*)
+      const totalWorkouts = leaderboardData.reduce((sum, entry) => sum + (entry.totalWorkoutsCompleted || 0), 0);
+      const avgCompletionRate = leaderboardData.reduce((sum, entry) => sum + (entry.completionRate || 0), 0) / (leaderboardData.length || 1);
+      const activeToday = playersData.filter(p => {
+        const lastActive = new Date(p.lastActive);
+        const today = new Date();
+        return lastActive.toDateString() === today.toDateString();
+      }).length;
 
-    // Workout categories distribution
-    const categoryDistribution = workoutsData.reduce((acc, workout) => {
-      acc[workout.category] = (acc[workout.category] || 0) + 1;
-      return acc;
-    }, {});
+      // Workout categories distribution
+      const categoryDistribution = workoutsData.reduce((acc, workout) => {
+        acc[workout.category] = (acc[workout.category] || 0) + 1;
+        return acc;
+      }, {});
 
-    // Activity trend (last 7 days)
-    const activityTrend = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - (6 - i));
-      return {
-        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        count: Math.floor(Math.random() * 50) + 10 // Mock data - replace with real API
-      };
-    });
+      // Activity trend (last 7 days)
+      const activityTrend = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() - (6 - i));
+        return {
+          date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          count: Math.floor(Math.random() * 50) + 10 // Mock data - replace with real API
+        };
+      });
 
       return {
         success: true,

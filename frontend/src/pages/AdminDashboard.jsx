@@ -19,6 +19,16 @@ const AdminDashboard = () => {
   const [filterRole, setFilterRole] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserModal, setShowUserModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [userToDelete, setUserToDelete] = useState(null);
+  const [editFormData, setEditFormData] = useState({
+    name: '',
+    email: '',
+    role: '',
+    skillLevel: '',
+    isActive: true
+  });
 
   useEffect(() => {
     // Check if user is admin
@@ -129,6 +139,49 @@ const AdminDashboard = () => {
       setShowUserModal(false);
     } catch (err) {
       alert(err.response?.data?.error || 'Failed to assign coach');
+    }
+  };
+
+  const handleEditUser = (user) => {
+    setSelectedUser(user);
+    setEditFormData({
+      name: user.name || '',
+      email: user.email || '',
+      role: user.role || '',
+      skillLevel: user.skillLevel || '',
+      isActive: user.isActive !== undefined ? user.isActive : true
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateUser = async () => {
+    try {
+      await adminService.updateUserRole(selectedUser._id, editFormData.role);
+      alert('User updated successfully!');
+      fetchDashboardData();
+      setShowEditModal(false);
+      setSelectedUser(null);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to update user');
+    }
+  };
+
+  const handleDeleteClick = (user) => {
+    setUserToDelete(user);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!userToDelete) return;
+    
+    try {
+      await adminService.deactivateUser(userToDelete._id);
+      alert('User deleted successfully!');
+      fetchDashboardData();
+      setShowDeleteConfirm(false);
+      setUserToDelete(null);
+    } catch (err) {
+      alert(err.response?.data?.error || 'Failed to delete user');
     }
   };
 
@@ -294,18 +347,18 @@ const AdminDashboard = () => {
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 mb-4">Top Performers</h3>
                   <div className="space-y-3">
-                    {leaderboard.slice(0, 5).map((user, index) => (
-                      <div key={user._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                    {leaderboard.slice(0, 5).map((entry, index) => (
+                      <div key={entry._id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                         <div className="flex items-center space-x-4">
                           <span className="text-2xl font-bold text-gray-400">#{index + 1}</span>
                           <div>
-                            <p className="font-semibold text-gray-900">{user.name}</p>
-                            <p className="text-sm text-gray-600">{user.stats?.totalWorkouts || 0} workouts</p>
+                            <p className="font-semibold text-gray-900">{entry.playerId?.name || 'Unknown'}</p>
+                            <p className="text-sm text-gray-600">{entry.totalWorkoutsCompleted || 0} workouts</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-bold text-basketball-orange">{user.totalPoints || 0} pts</p>
-                          <p className="text-sm text-gray-600">{user.stats?.completionRate || 0}% completion</p>
+                          <p className="font-bold text-basketball-orange">{entry.points || 0} pts</p>
+                          <p className="text-sm text-gray-600">{Math.round(entry.completionRate || 0)}% completion</p>
                         </div>
                       </div>
                     ))}
@@ -387,6 +440,18 @@ const AdminDashboard = () => {
                             >
                               View
                             </button>
+                            <button
+                              onClick={() => handleEditUser(user)}
+                              className="text-blue-600 hover:text-blue-800 mr-3"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteClick(user)}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -457,8 +522,8 @@ const AdminDashboard = () => {
                 </div>
 
                 <div className="space-y-3">
-                  {leaderboard.map((user, index) => (
-                    <div key={user._id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
+                  {leaderboard.map((entry, index) => (
+                    <div key={entry._id} className="flex items-center justify-between p-4 bg-white border border-gray-200 rounded-lg hover:shadow-md transition-shadow">
                       <div className="flex items-center space-x-4">
                         <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
                           index === 0 ? 'bg-yellow-500' :
@@ -469,14 +534,14 @@ const AdminDashboard = () => {
                           {index + 1}
                         </div>
                         <div>
-                          <p className="font-semibold text-gray-900">{user.name}</p>
+                          <p className="font-semibold text-gray-900">{entry.playerId?.name || 'Unknown Player'}</p>
                           <p className="text-sm text-gray-600">
-                            {user.stats?.totalWorkouts || 0} workouts · {user.stats?.completionRate || 0}% completion
+                            {entry.totalWorkoutsCompleted || 0} workouts · {Math.round(entry.completionRate || 0)}% completion
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-basketball-orange">{user.totalPoints || 0}</p>
+                        <p className="text-2xl font-bold text-basketball-orange">{entry.points || 0}</p>
                         <p className="text-sm text-gray-600">points</p>
                       </div>
                     </div>
@@ -606,8 +671,176 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Edit User Modal */}
+      {showEditModal && selectedUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full">
+            <div className="p-6">
+              <div className="flex justify-between items-start mb-6">
+                <h3 className="text-2xl font-bold text-gray-900">Edit User</h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Name
+                  </label>
+                  <input
+                    type="text"
+                    value={editFormData.name}
+                    onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-basketball-orange focus:border-transparent"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Name cannot be changed</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    value={editFormData.email}
+                    onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-basketball-orange focus:border-transparent"
+                    disabled
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Role <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    value={editFormData.role}
+                    onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-basketball-orange focus:border-transparent"
+                  >
+                    <option value="player">Player</option>
+                    <option value="coach">Coach</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Skill Level
+                  </label>
+                  <select
+                    value={editFormData.skillLevel}
+                    onChange={(e) => setEditFormData({ ...editFormData, skillLevel: e.target.value })}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-basketball-orange focus:border-transparent"
+                    disabled
+                  >
+                    <option value="">Not set</option>
+                    <option value="beginner">Beginner</option>
+                    <option value="intermediate">Intermediate</option>
+                    <option value="advanced">Advanced</option>
+                    <option value="expert">Expert</option>
+                  </select>
+                  <p className="text-xs text-gray-500 mt-1">Skill level cannot be changed by admin</p>
+                </div>
+
+                <div className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={editFormData.isActive}
+                    onChange={(e) => setEditFormData({ ...editFormData, isActive: e.target.checked })}
+                    className="w-4 h-4 text-basketball-orange border-gray-300 rounded focus:ring-basketball-orange"
+                    disabled
+                  />
+                  <label className="ml-2 text-sm text-gray-700">
+                    Active User
+                  </label>
+                </div>
+              </div>
+
+              <div className="mt-6 flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleUpdateUser}
+                  className="flex-1 px-4 py-2 bg-basketball-orange text-white rounded-lg hover:bg-orange-600 transition-colors"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && userToDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-center mb-4">
+                <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+                  <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900">Delete User</h3>
+                  <p className="text-sm text-gray-600">This action cannot be undone</p>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-gray-700">
+                  Are you sure you want to delete <span className="font-semibold">{userToDelete.name}</span>?
+                </p>
+                <p className="text-sm text-gray-600 mt-2">
+                  Email: {userToDelete.email}
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowDeleteConfirm(false);
+                    setUserToDelete(null);
+                  }}
+                  className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  Delete User
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
 
 export default AdminDashboard;

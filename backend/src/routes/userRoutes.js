@@ -9,7 +9,9 @@ const {
   getPlayers,
   getCoaches,
   assignCoach,
-  deactivateAccount
+  deactivateAccount,
+  deactivateUser,
+  updateUserRole
 } = require('../controllers/userController');
 
 // Import middleware
@@ -58,5 +60,15 @@ router.get('/:userId', protect, validateMongoId('userId'), getUserById);
 // @desc    Assign coach to player
 // @access  Private (Admin or player themselves)
 router.put('/:userId/assign-coach', protect, validateMongoId('userId'), assignCoach);
+
+// @route   PUT /api/users/:userId/role
+// @desc    Update user role (Admin only)
+// @access  Private (Admin)
+router.put('/:userId/role', protect, authorize('admin'), validateMongoId('userId'), updateUserRole);
+
+// @route   DELETE /api/users/:userId
+// @desc    Deactivate user by ID (Admin only)
+// @access  Private (Admin)
+router.delete('/:userId', protect, authorize('admin'), validateMongoId('userId'), deactivateUser);
 
 module.exports = router;

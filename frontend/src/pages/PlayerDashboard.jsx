@@ -122,25 +122,34 @@ const PlayerDashboard = () => {
               >
                 Dashboard
               </Link>
-              <Link
-                to="/progress"
-                className="text-gray-700 hover:text-basketball-orange transition font-medium"
-              >
-                📊 Progress
-              </Link>
-              <Link
-                to="/ai-analysis"
-                className="text-gray-700 hover:text-basketball-orange transition font-medium"
-              >
-                🤖 AI Analysis
-              </Link>
+              
+              {/* Hide these links for admin */}
+              {user?.role !== 'admin' && (
+                <>
+                  <Link
+                    to="/progress"
+                    className="text-gray-700 hover:text-basketball-orange transition font-medium"
+                  >
+                    📊 Progress
+                  </Link>
+                  <Link
+                    to="/ai-analysis"
+                    className="text-gray-700 hover:text-basketball-orange transition font-medium"
+                  >
+                    🤖 AI Analysis
+                  </Link>
+                </>
+              )}
+              
               <Link
                 to="/leaderboard"
                 className="text-gray-700 hover:text-basketball-orange transition font-medium"
               >
                 🏆 Leaderboard
               </Link>
-              {(user?.role === 'coach' || user?.role === 'admin') && (
+              
+              {/* Coach Portal - Only for coaches (not admin) */}
+              {user?.role === 'coach' && (
                 <Link
                   to="/coach/portal"
                   className="text-gray-700 hover:text-basketball-orange transition font-medium"
@@ -148,6 +157,8 @@ const PlayerDashboard = () => {
                   👨‍🏫 Coach Portal
                 </Link>
               )}
+              
+              {/* Admin Panel - Only for admin */}
               {user?.role === 'admin' && (
                 <Link
                   to="/admin/dashboard"
@@ -156,12 +167,17 @@ const PlayerDashboard = () => {
                   🛡️ Admin Panel
                 </Link>
               )}
-              <Link
-                to="/workouts"
-                className="text-gray-700 hover:text-basketball-orange transition font-medium"
-              >
-                Workouts
-              </Link>
+              
+              {/* Workouts - Hide for admin */}
+              {user?.role !== 'admin' && (
+                <Link
+                  to="/workouts"
+                  className="text-gray-700 hover:text-basketball-orange transition font-medium"
+                >
+                  Workouts
+                </Link>
+              )}
+              
               <Link
                 to="/profile"
                 className="text-gray-700 hover:text-basketball-orange transition font-medium"
@@ -283,246 +299,273 @@ const PlayerDashboard = () => {
 
         {/* Quick Access Cards - Phase 3 Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {/* Progress Charts Card */}
-          <Link
-            to="/progress"
-            className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">Track Your Progress</h3>
-              <span className="text-3xl">📊</span>
-            </div>
-            <p className="text-sm text-blue-100 mb-4">
-              View detailed analytics, charts, and insights about your training performance
-            </p>
-            <div className="flex items-center text-sm font-medium">
-              <span>View Charts</span>
-              <span className="ml-2">→</span>
-            </div>
-          </Link>
+          {/* For Admin: Only show Leaderboard and Admin Dashboard */}
+          {user?.role === 'admin' ? (
+            <>
+              {/* Leaderboard Card */}
+              <Link
+                to="/leaderboard"
+                className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">View Leaderboard</h3>
+                  <span className="text-3xl">🏆</span>
+                </div>
+                <p className="text-sm text-yellow-100 mb-4">
+                  See how you rank against other players and compete for the top spot
+                </p>
+                <div className="flex items-center text-sm font-medium">
+                  <span>Check Rankings</span>
+                  <span className="ml-2">→</span>
+                </div>
+              </Link>
 
-          {/* AI Analysis Card */}
-          <Link
-            to="/ai-analysis"
-            className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">AI Performance Analysis</h3>
-              <span className="text-3xl">🤖</span>
-            </div>
-            <p className="text-sm text-purple-100 mb-4">
-              Get personalized insights and recommendations powered by AI
-            </p>
-            <div className="flex items-center text-sm font-medium">
-              <span>Get AI Insights</span>
-              <span className="ml-2">→</span>
-            </div>
-          </Link>
+              {/* Admin Dashboard Card */}
+              <Link
+                to="/admin/dashboard"
+                className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">Admin Dashboard</h3>
+                  <span className="text-3xl">🛡️</span>
+                </div>
+                <p className="text-sm text-gray-300 mb-4">
+                  Manage users, workouts, leaderboard, and view system analytics
+                </p>
+                <div className="flex items-center text-sm font-medium">
+                  <span>Open Dashboard</span>
+                  <span className="ml-2">→</span>
+                </div>
+              </Link>
+            </>
+          ) : (
+            <>
+              {/* For Players and Coaches: Show all cards */}
+              
+              {/* Progress Charts Card */}
+              <Link
+                to="/progress"
+                className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">Track Your Progress</h3>
+                  <span className="text-3xl">📊</span>
+                </div>
+                <p className="text-sm text-blue-100 mb-4">
+                  View detailed analytics, charts, and insights about your training performance
+                </p>
+                <div className="flex items-center text-sm font-medium">
+                  <span>View Charts</span>
+                  <span className="ml-2">→</span>
+                </div>
+              </Link>
 
-          {/* Leaderboard Card */}
-          <Link
-            to="/leaderboard"
-            className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-lg font-semibold">View Leaderboard</h3>
-              <span className="text-3xl">🏆</span>
-            </div>
-            <p className="text-sm text-yellow-100 mb-4">
-              See how you rank against other players and compete for the top spot
-            </p>
-            <div className="flex items-center text-sm font-medium">
-              <span>Check Rankings</span>
-              <span className="ml-2">→</span>
-            </div>
-          </Link>
+              {/* AI Analysis Card */}
+              <Link
+                to="/ai-analysis"
+                className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">AI Performance Analysis</h3>
+                  <span className="text-3xl">🤖</span>
+                </div>
+                <p className="text-sm text-purple-100 mb-4">
+                  Get personalized insights and recommendations powered by AI
+                </p>
+                <div className="flex items-center text-sm font-medium">
+                  <span>Get AI Insights</span>
+                  <span className="ml-2">→</span>
+                </div>
+              </Link>
 
-          {/* Coach Portal Card - Only for Coaches/Admins */}
-          {(user?.role === 'coach' || user?.role === 'admin') && (
-            <Link
-              to="/coach/portal"
-              className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">Coach Portal</h3>
-                <span className="text-3xl">👨‍🏫</span>
-              </div>
-              <p className="text-sm text-purple-100 mb-4">
-                Manage your players, assign workouts, and provide personalized feedback
-              </p>
-              <div className="flex items-center text-sm font-medium">
-                <span>Open Portal</span>
-                <span className="ml-2">→</span>
-              </div>
-            </Link>
-          )}
+              {/* Leaderboard Card */}
+              <Link
+                to="/leaderboard"
+                className="bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+              >
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold">View Leaderboard</h3>
+                  <span className="text-3xl">�</span>
+                </div>
+                <p className="text-sm text-yellow-100 mb-4">
+                  See how you rank against other players and compete for the top spot
+                </p>
+                <div className="flex items-center text-sm font-medium">
+                  <span>Check Rankings</span>
+                  <span className="ml-2">→</span>
+                </div>
+              </Link>
 
-          {/* Admin Dashboard Card - Only for Admins */}
-          {user?.role === 'admin' && (
-            <Link
-              to="/admin/dashboard"
-              className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
-            >
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold">Admin Dashboard</h3>
-                <span className="text-3xl">🛡️</span>
-              </div>
-              <p className="text-sm text-gray-300 mb-4">
-                Manage users, workouts, leaderboard, and view system analytics
-              </p>
-              <div className="flex items-center text-sm font-medium">
-                <span>Open Dashboard</span>
-                <span className="ml-2">→</span>
-              </div>
-            </Link>
+              {/* Coach Portal Card - Only for Coaches */}
+              {user?.role === 'coach' && (
+                <Link
+                  to="/coach/portal"
+                  className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 hover:shadow-xl transition transform hover:-translate-y-1 text-white"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-semibold">Coach Portal</h3>
+                    <span className="text-3xl">�‍🏫</span>
+                  </div>
+                  <p className="text-sm text-purple-100 mb-4">
+                    Manage your players, assign workouts, and provide personalized feedback
+                  </p>
+                  <div className="flex items-center text-sm font-medium">
+                    <span>Open Portal</span>
+                    <span className="ml-2">→</span>
+                  </div>
+                </Link>
+              )}
+            </>
           )}
         </div>
 
-        {/* Workouts Section - Different for Players vs Coaches */}
-        <div className={`bg-white rounded-xl shadow-md ${
-          user?.role === 'coach' || user?.role === 'admin' ? 'border-2 border-purple-200' : 'border-2 border-orange-200'
-        }`}>
-          <div className={`p-6 border-b ${
-            user?.role === 'coach' || user?.role === 'admin' ? 'border-purple-200 bg-purple-50' : 'border-gray-200'
+        {/* Workouts Section - Different for Players vs Coaches (Hidden for Admin) */}
+        {user?.role !== 'admin' && (
+          <div className={`bg-white rounded-xl shadow-md ${
+            user?.role === 'coach' ? 'border-2 border-purple-200' : 'border-2 border-orange-200'
           }`}>
-            <div className="flex justify-between items-center">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  {user?.role === 'coach' || user?.role === 'admin' ? 'My Created Workouts' : 'Your Assigned Workouts'}
-                </h2>
-                <p className="text-sm text-gray-600 mt-1">
-                  {user?.role === 'coach' || user?.role === 'admin' 
-                    ? 'Workouts you\'ve created for your players' 
-                    : 'Training programs assigned to you'}
-                </p>
+            <div className={`p-6 border-b ${
+              user?.role === 'coach' ? 'border-purple-200 bg-purple-50' : 'border-gray-200'
+            }`}>
+              <div className="flex justify-between items-center">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900">
+                    {user?.role === 'coach' ? 'My Created Workouts' : 'Your Assigned Workouts'}
+                  </h2>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {user?.role === 'coach' 
+                      ? 'Workouts you\'ve created for your players' 
+                      : 'Training programs assigned to you'}
+                  </p>
+                </div>
+                {user?.role === 'coach' && (
+                  <Link
+                    to="/workouts/create"
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium flex items-center gap-2"
+                  >
+                    <span>+</span>
+                    <span>Create Workout</span>
+                  </Link>
+                )}
               </div>
-              {(user?.role === 'coach' || user?.role === 'admin') && (
-                <Link
-                  to="/workouts/create"
-                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition font-medium flex items-center gap-2"
-                >
-                  <span>+</span>
-                  <span>Create Workout</span>
-                </Link>
+            </div>
+
+            <div className="p-6">
+              {loading ? (
+                <div className="flex justify-center py-12">
+                  <Loading size="large" text="Loading workouts..." />
+                </div>
+              ) : error ? (
+                <div className="text-center py-12">
+                  <p className="text-red-500 mb-4">{error}</p>
+                  <button
+                    onClick={fetchWorkouts}
+                    className="px-4 py-2 bg-basketball-orange text-white rounded-lg hover:bg-orange-600 transition"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : workouts.length === 0 ? (
+                <div className="text-center py-12">
+                  <span className="text-6xl mb-4 block">
+                    {user?.role === 'coach' ? '📋' : '🏀'}
+                  </span>
+                  <p className="text-gray-500 text-lg mb-4">
+                    {user?.role === 'coach' 
+                      ? 'No workouts created yet.' 
+                      : 'No workouts assigned yet.'}
+                  </p>
+                  <p className="text-gray-400 text-sm">
+                    {user?.role === 'coach'
+                      ? 'Create your first workout to get started!'
+                      : 'Check back soon for new training plans!'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {workouts.map((workout) => (
+                    <div
+                      key={workout._id}
+                      className={`border-2 rounded-lg p-5 hover:shadow-md transition cursor-pointer ${
+                        user?.role === 'coach'
+                          ? 'border-purple-200 hover:border-purple-400 bg-gradient-to-r from-white to-purple-50'
+                          : 'border-orange-200 hover:border-orange-400'
+                      }`}
+                      onClick={() => navigate(`/workouts/${workout._id}`)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            {user?.role === 'coach' && (
+                              <span className="text-lg">👨‍🏫</span>
+                            )}
+                            <h3 className="text-xl font-semibold text-gray-900">
+                              {workout.title}
+                            </h3>
+                          </div>
+                          <p className="text-gray-600 mb-3 line-clamp-2">
+                            {workout.description}
+                          </p>
+                          
+                          {/* Badges */}
+                          <div className="flex flex-wrap gap-2">
+                            {/* Skill Level Badge */}
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              workout.skillLevel === 'beginner' ? 'bg-green-100 text-green-800' :
+                              workout.skillLevel === 'intermediate' ? 'bg-blue-100 text-blue-800' :
+                              workout.skillLevel === 'advanced' ? 'bg-purple-100 text-purple-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {workout.skillLevel?.charAt(0).toUpperCase() + workout.skillLevel?.slice(1)}
+                            </span>
+                            
+                            {/* Category Badge */}
+                            <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
+                              {workout.category}
+                            </span>
+                            
+                            {/* AI Generated Badge */}
+                            {workout.isAIGenerated && (
+                              <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium flex items-center">
+                                <span className="mr-1">✨</span>
+                                AI Generated
+                              </span>
+                            )}
+                            
+                            {/* Public Badge */}
+                            {workout.isPublic && (
+                              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
+                                Public
+                              </span>
+                            )}
+                          </div>
+                          
+                          {/* Workout Info */}
+                          {workout.exercises && (
+                            <p className="text-sm text-gray-500 mt-3">
+                              {workout.exercises.length} exercises
+                            </p>
+                          )}
+                        </div>
+                        
+                        {/* Start Button */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/workouts/${workout._id}`);
+                          }}
+                          className="ml-4 px-6 py-2 bg-basketball-orange text-white rounded-lg hover:bg-orange-600 transition font-semibold whitespace-nowrap"
+                        >
+                          Start
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>
-
-          <div className="p-6">
-            {loading ? (
-              <div className="flex justify-center py-12">
-                <Loading size="large" text="Loading workouts..." />
-              </div>
-            ) : error ? (
-              <div className="text-center py-12">
-                <p className="text-red-500 mb-4">{error}</p>
-                <button
-                  onClick={fetchWorkouts}
-                  className="px-4 py-2 bg-basketball-orange text-white rounded-lg hover:bg-orange-600 transition"
-                >
-                  Try Again
-                </button>
-              </div>
-            ) : workouts.length === 0 ? (
-              <div className="text-center py-12">
-                <span className="text-6xl mb-4 block">
-                  {user?.role === 'coach' || user?.role === 'admin' ? '📋' : '🏀'}
-                </span>
-                <p className="text-gray-500 text-lg mb-4">
-                  {user?.role === 'coach' || user?.role === 'admin' 
-                    ? 'No workouts created yet.' 
-                    : 'No workouts assigned yet.'}
-                </p>
-                <p className="text-gray-400 text-sm">
-                  {user?.role === 'coach' || user?.role === 'admin'
-                    ? 'Create your first workout to get started!'
-                    : 'Check back soon for new training plans!'}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {workouts.map((workout) => (
-                  <div
-                    key={workout._id}
-                    className={`border-2 rounded-lg p-5 hover:shadow-md transition cursor-pointer ${
-                      user?.role === 'coach' || user?.role === 'admin'
-                        ? 'border-purple-200 hover:border-purple-400 bg-gradient-to-r from-white to-purple-50'
-                        : 'border-orange-200 hover:border-orange-400'
-                    }`}
-                    onClick={() => navigate(`/workouts/${workout._id}`)}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {(user?.role === 'coach' || user?.role === 'admin') && (
-                            <span className="text-lg">👨‍🏫</span>
-                          )}
-                          <h3 className="text-xl font-semibold text-gray-900">
-                            {workout.title}
-                          </h3>
-                        </div>
-                        <p className="text-gray-600 mb-3 line-clamp-2">
-                          {workout.description}
-                        </p>
-                        
-                        {/* Badges */}
-                        <div className="flex flex-wrap gap-2">
-                          {/* Skill Level Badge */}
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            workout.skillLevel === 'beginner' ? 'bg-green-100 text-green-800' :
-                            workout.skillLevel === 'intermediate' ? 'bg-blue-100 text-blue-800' :
-                            workout.skillLevel === 'advanced' ? 'bg-purple-100 text-purple-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {workout.skillLevel?.charAt(0).toUpperCase() + workout.skillLevel?.slice(1)}
-                          </span>
-                          
-                          {/* Category Badge */}
-                          <span className="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-medium">
-                            {workout.category}
-                          </span>
-                          
-                          {/* AI Generated Badge */}
-                          {workout.isAIGenerated && (
-                            <span className="px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm font-medium flex items-center">
-                              <span className="mr-1">✨</span>
-                              AI Generated
-                            </span>
-                          )}
-                          
-                          {/* Public Badge */}
-                          {workout.isPublic && (
-                            <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-medium">
-                              Public
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Workout Info */}
-                        {workout.exercises && (
-                          <p className="text-sm text-gray-500 mt-3">
-                            {workout.exercises.length} exercises
-                          </p>
-                        )}
-                      </div>
-                      
-                      {/* Start Button */}
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/workouts/${workout._id}`);
-                        }}
-                        className="ml-4 px-6 py-2 bg-basketball-orange text-white rounded-lg hover:bg-orange-600 transition font-semibold whitespace-nowrap"
-                      >
-                        Start
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </main>
     </div>
   );

@@ -429,6 +429,97 @@ const deactivateAccount = async (req, res) => {
   }
 };
 
+/**
+ * @desc    Deactivate any user account (Admin only)
+ * @route   DELETE /api/users/:userId
+ * @access  Private (Admin)
+ */
+const deactivateUser = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find user and deactivate
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { isActive: false },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User deactivated successfully',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    console.error('Deactivate user error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error deactivating user',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
+/**
+ * @desc    Update user role (Admin only)
+ * @route   PUT /api/users/:userId/role
+ * @access  Private (Admin)
+ */
+const updateUserRole = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    // Validate role
+    if (!['player', 'coach', 'admin'].includes(role)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid role. Must be player, coach, or admin'
+      });
+    }
+
+    // Find user and update role
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { role },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: 'User role updated successfully',
+      data: {
+        user
+      }
+    });
+  } catch (error) {
+    console.error('Update user role error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Server error updating user role',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+};
+
 module.exports = {
   getProfile,
   updateProfile,
@@ -436,5 +527,7 @@ module.exports = {
   getPlayers,
   getCoaches,
   assignCoach,
-  deactivateAccount
+  deactivateAccount,
+  deactivateUser,
+  updateUserRole
 };
