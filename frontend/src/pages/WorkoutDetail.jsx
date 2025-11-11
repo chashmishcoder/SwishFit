@@ -291,31 +291,39 @@ const WorkoutDetail = () => {
                       </div>
 
                       {/* Instructions */}
-                      {exercise.instructions && exercise.instructions.length > 0 && (
+                      {exercise.instructions && (
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-700 mb-2">Instructions:</p>
-                          <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                            {exercise.instructions.map((instruction, idx) => (
-                              <li key={idx}>{instruction}</li>
-                            ))}
-                          </ol>
+                          {Array.isArray(exercise.instructions) ? (
+                            <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
+                              {exercise.instructions.map((instruction, idx) => (
+                                <li key={idx}>{instruction}</li>
+                              ))}
+                            </ol>
+                          ) : (
+                            <p className="text-sm text-gray-600">{exercise.instructions}</p>
+                          )}
                         </div>
                       )}
 
                       {/* Equipment */}
-                      {exercise.equipment && exercise.equipment.length > 0 && (
+                      {exercise.equipment && (
                         <div className="mt-3">
                           <p className="text-sm font-medium text-gray-700 mb-2">Equipment:</p>
-                          <div className="flex flex-wrap gap-2">
-                            {exercise.equipment.map((item, idx) => (
-                              <span
-                                key={idx}
-                                className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm"
-                              >
-                                {item}
-                              </span>
-                            ))}
-                          </div>
+                          {Array.isArray(exercise.equipment) ? (
+                            <div className="flex flex-wrap gap-2">
+                              {exercise.equipment.map((item, idx) => (
+                                <span
+                                  key={idx}
+                                  className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-sm"
+                                >
+                                  {item}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-sm text-gray-600">{exercise.equipment}</p>
+                          )}
                         </div>
                       )}
                     </div>

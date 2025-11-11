@@ -449,31 +449,39 @@ const StartWorkout = () => {
             )}
 
             {/* Instructions */}
-            {currentExercise.instructions && currentExercise.instructions.length > 0 && (
+            {currentExercise.instructions && (
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">📋 Instructions</h3>
-                <ol className="list-decimal list-inside space-y-2 text-gray-700">
-                  {currentExercise.instructions.map((instruction, idx) => (
-                    <li key={idx} className="leading-relaxed">{instruction}</li>
-                  ))}
-                </ol>
+                {Array.isArray(currentExercise.instructions) ? (
+                  <ol className="list-decimal list-inside space-y-2 text-gray-700">
+                    {currentExercise.instructions.map((instruction, idx) => (
+                      <li key={idx} className="leading-relaxed">{instruction}</li>
+                    ))}
+                  </ol>
+                ) : (
+                  <p className="text-gray-700 leading-relaxed">{currentExercise.instructions}</p>
+                )}
               </div>
             )}
 
             {/* Equipment */}
-            {currentExercise.equipment && currentExercise.equipment.length > 0 && (
+            {currentExercise.equipment && (
               <div className="mb-6">
                 <h3 className="font-semibold text-gray-900 mb-3">🏀 Equipment Needed</h3>
-                <div className="flex flex-wrap gap-2">
-                  {currentExercise.equipment.map((item, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-gray-100 text-gray-800 rounded-lg"
-                    >
-                      {item}
-                    </span>
-                  ))}
-                </div>
+                {Array.isArray(currentExercise.equipment) ? (
+                  <div className="flex flex-wrap gap-2">
+                    {currentExercise.equipment.map((item, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-gray-100 text-gray-800 rounded-lg"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-700">{currentExercise.equipment}</p>
+                )}
               </div>
             )}
 
