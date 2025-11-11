@@ -58,3 +58,6 @@ combined.log
 # Temporary files
 .tmp/
 temp/
+
+# Documentation
+docs/
