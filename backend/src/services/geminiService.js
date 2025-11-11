@@ -9,9 +9,9 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
  */
 class GeminiService {
   constructor() {
-    // Use gemini-pro model (free tier)
+    // Use gemini-2.5-flash model (latest version)
     this.model = genAI.getGenerativeModel({ 
-      model: process.env.GEMINI_MODEL || 'gemini-pro' 
+      model: process.env.GEMINI_MODEL || 'gemini-2.5-flash' 
     });
   }
 
@@ -120,7 +120,7 @@ Return ONLY a valid JSON object with this exact structure (no additional text be
         rawResponse: text,
         metadata: {
           generatedAt: new Date(),
-          model: process.env.GEMINI_MODEL || 'gemini-pro',
+          model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
           promptTokens: text.length // Approximate
         }
       };

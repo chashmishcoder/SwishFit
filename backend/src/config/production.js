@@ -70,7 +70,7 @@ module.exports = {
   // Gemini AI Configuration
   gemini: {
     apiKey: process.env.GEMINI_API_KEY,
-    model: process.env.GEMINI_MODEL || 'gemini-pro',
+    model: process.env.GEMINI_MODEL || 'gemini-2.5-flash',
     temperature: 0.7,
     maxOutputTokens: 1024
   },
